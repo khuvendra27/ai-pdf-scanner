@@ -6,12 +6,22 @@ import requests
 import pdfplumber
 from pathlib import Path
 from google import genai  # LLM client
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env
+load_dotenv()
+
+# Initialize LLM client
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise EnvironmentError("GEMINI_API_KEY not set in environment variables")
 
 # Simple in-memory log for audit
 audit_log = {}
 
 # Initialize the LLM client (expects GEMINI_API_KEY in environment variables)
-client = genai.Client(api_key = "AIzaSyCh2HyCdxK_FZv8kC6pZ4Go5rxf56p2_ak")
+client = genai.Client()
 
 class SummarizePDFView(APIView):
     def post(self, request):
