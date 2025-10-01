@@ -66,11 +66,21 @@ class SummarizePDFView(APIView):
             # Step 3: Summarize text using LLM
             try:
                 prompt = (
-                    "Summarize the following corporate filing PDF text in short and clear sentences. "
-                    "Focus on the main outcomes of the board meeting and key decisions:\n\n"
-                    f"{extracted_text}"
+                    "You are an expert corporate analyst. Summarize the following corporate filing PDF text in a professional, "
+                    "concise, and structured manner suitable for senior management and investors. "
+                    "Focus specifically on the main outcomes of the board meeting, key decisions, financial approvals, "
+                    "strategic initiatives, compliance matters, and any timelines mentioned. "
+                    "Do not include trivial details. Use the following guidelines:\n\n"
+                    "1. Start with a one-line overall summary.\n"
+                    "2. Provide key points as bullet points.\n"
+                    "3. Highlight decisions, approvals, and actions required.\n"
+                    "4. Include any relevant dates, financial figures, or targets mentioned.\n"
+                    "5. Keep language formal, precise, and professional.\n\n"
+                    "Here is the PDF text to summarize:\n\n"
+                    f"{extracted_text}\n\n"
+                    "Provide the output in clear bullet points and a brief one-line summary at the top."
                 )
-
+                
                 llm_response = client.models.generate_content(
                     model="gemini-2.5-flash",
                     contents=prompt
