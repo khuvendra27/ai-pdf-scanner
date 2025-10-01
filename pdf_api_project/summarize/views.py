@@ -8,6 +8,7 @@ from pathlib import Path
 from google import genai  # LLM client
 from dotenv import load_dotenv
 import os
+from .models import PDFSummaryAudit
 
 # Load environment variables from .env
 load_dotenv()
@@ -98,6 +99,20 @@ class SummarizePDFView(APIView):
                 "summary": summary_text
             }
 
+            try:
+                audit_entry, created = PDFSummaryAudit.objects.update_or_create(
+                    url=url,
+                    defaults={
+                        "extracted_text": extracted_text,
+                        "summary": summary_text
+                    }
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to save audit log: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
             # Step 5: Return JSON response
             return Response(
                 {
@@ -109,3 +124,18 @@ class SummarizePDFView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AuditLogsView(APIView):
+    def get(self, request):
+        logs = PDFSummaryAudit.objects.all().order_by('-created_at')
+        data = [
+            {
+                "url": log.url,
+                "summary": log.summary,
+                "extracted_text" : log.extracted_text, 
+                "created_at": log.created_at,
+            }
+            for log in logs
+        ]
+        return Response(data)
